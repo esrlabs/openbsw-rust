@@ -120,4 +120,11 @@ extern "C" void log_lwipInfo(char const* message, ...)
 
 extern "C" void log_lwipError(char const* message) { Logger::error(LWIP, message); }
 
+::logger::PlainLoggerMappingInfo const* getLoggerComponentInfoTable()
+{
+    return loggerComponentInfoTable;
+}
+
+uintptr_t getLoggerComponentInfoTableSize() { return LoggerComponentMappingType::MappingSize; }
+
 } // namespace logger

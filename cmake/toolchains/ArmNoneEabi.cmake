@@ -32,6 +32,7 @@ set(_CC_CXX_COMMON
     -fstack-usage \
     -mno-unaligned-access \
     -mthumb")
+set(Rust_CARGO_TARGET thumbv7em-none-eabihf)
 
 if (NOT DEFINED _C_FLAGS)
     set(_C_FLAGS "")

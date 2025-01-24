@@ -2,10 +2,18 @@
 
 #include "util/format/AttributedString.h"
 
+#include <type_traits>
+
 namespace util
 {
 namespace format
 {
+
+static_assert(std::is_standard_layout<PlainAttributedString>::value, "required for rust interop");
+static_assert(std::is_standard_layout<StringAttributes>::value, "required for rust interop");
+static_assert(std::is_standard_layout<PlainStringAttributes>::value, "required for rust interop");
+static_assert(std::is_standard_layout<Color>::value, "required for rust interop");
+
 AttributedString::AttributedString(PlainAttributedString const& attributedString)
 : AttributedString(attributedString._string, attributedString._attributes)
 {}

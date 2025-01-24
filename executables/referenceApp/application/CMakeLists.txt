@@ -49,6 +49,7 @@ target_link_libraries(
             lwipcore
             asyncConsole
             bspMcu
+            bsw_logger
             configuration
             ethConfiguration
             etl
@@ -64,6 +65,7 @@ target_link_libraries(
             util
             udsConfigurationImpl
             runtime
+            rust_hello_world
             safeLifecycle
             socBsp)
 

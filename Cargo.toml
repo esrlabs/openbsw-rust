@@ -1,0 +1,22 @@
+[workspace]
+resolver = "3"
+
+members = [
+  "executables/referenceApp/rustHelloWorld",
+  "libs/bsw/logger/rust",
+  "libs/rust/console_out",
+]
+
+[workspace.package]
+version = "0.1.0"
+documentation = "https://eclipse-openbsw.github.io/openbsw/"
+
+[workspace.dependencies]
+log = "0.4"
+panic_handler = {path = "libs/rust/panic_handler"}
+
+[profile.dev]
+panic ="abort"
+
+[profile.release]
+panic ="abort"

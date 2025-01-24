@@ -60,6 +60,9 @@ extern ::ethernet::IEthernetDriverSystem& getEthernetSystem();
 } // namespace systems
 #endif
 
+#include "BswLogger.h"
+#include "rustHelloWorld.h"
+
 #include <platform/estdint.h>
 
 namespace platform
@@ -149,6 +152,11 @@ public:
 
         ::console::init();
         ::console::enable();
+
+        ::logger::add_component_info_array(
+            ::logger::getLoggerComponentInfoTableSize(), ::logger::getLoggerComponentInfoTable());
+        ::logger::map_crate_to_component("rust_hello_world", "CONSOLE");
+        ::logger::install_rust_logging();
     }
 
     void start() { ::async::execute(AsyncAdapter::TASK_IDLE, *this); }
@@ -194,6 +202,10 @@ void startApp()
     runtime::Tracer::init();
     runtime::Tracer::start();
 #endif
+    printf(
+        "calculated by rust: 33 + 9 = %lli\r\n",
+        (long long unsigned int)rustHelloWorld::add(33, 9));
+    // AsyncAdapter::init();
 
     /* runlevel 1 */
     ::platform::platformLifecycleAdd(lifecycleManager, 1U);

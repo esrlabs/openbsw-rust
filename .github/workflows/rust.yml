@@ -1,0 +1,48 @@
+name: Rust CI
+
+on: [ merge_group, pull_request ]
+
+jobs:
+  cargo-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.0
+          components: clippy, rustfmt
+
+      - run: cargo clippy --all-features
+
+      - run: cargo fmt --check
+
+      - run: cargo build --all-features
+
+  cargo-hack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.0
+          components: clippy, rustfmt
+
+      - uses: taiki-e/install-action@cargo-hack
+
+      - run: cargo hack check
+
+  cargo-miri:
+    runs-on: ubuntu-latest
+    env:
+      MIRIFLAGS: "-Zmiri-disable-isolation"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly-2024-12-17
+          components: miri, rust-src
+
+      - run: cargo +nightly-2024-12-17 miri test

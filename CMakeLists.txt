@@ -43,6 +43,17 @@ project(
 
 list(APPEND CMAKE_MODULE_PATH "cmake/modules")
 
+include(FetchContent)
+
+FetchContent_Declare(
+    Corrosion
+    GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+    GIT_TAG v0.5 # Optionally specify a commit hash, version tag or branch here
+)
+# Set any global configuration variables such as `Rust_TOOLCHAIN` before this
+# line!
+FetchContent_MakeAvailable(Corrosion)
+
 option(BUILD_UNIT_TESTS "Build unit tests" OFF)
 
 option(BUILD_TRACING "Build CTF tracing" OFF)
@@ -87,6 +98,12 @@ set(INCLUDE_OPENBSW_LIBS_BSP
     ON
     CACHE BOOL "Include openbsw/libs/bsp/ in build")
 
+set(OPENBSW_DIR
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    CACHE PATH "Path to Eclipse OpenBSW")
+corrosion_import_crate(
+    MANIFEST_PATH ${OPENBSW_DIR}/Cargo.toml
+    LOCKED)
 add_subdirectory(platforms EXCLUDE_FROM_ALL)
 add_subdirectory(libs EXCLUDE_FROM_ALL)
 
