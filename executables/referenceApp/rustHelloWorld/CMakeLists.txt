@@ -1,0 +1,1 @@
+target_include_directories(rust_hello_world INTERFACE include)

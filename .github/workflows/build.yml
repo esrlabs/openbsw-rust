@@ -30,6 +30,21 @@ jobs:
         with:
           cmake-version: '3.22.x'
 
+      - name: Set up rust toolchain
+        if: ${{ startsWith(matrix.platform, 'posix') }}
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.0
+          components: clippy, rustfmt
+
+      - name: Set up rust toolchain
+        if: ${{ matrix.platform == 's32k148' }}
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.0
+          components: clippy, rustfmt
+          targets: thumbv7em-none-eabihf
+
       - name: Set up ARM GCC
         if: ${{ matrix.platform == 's32k148' }}
         uses: carlosperate/arm-none-eabi-gcc-action@v1

@@ -30,6 +30,12 @@ jobs:
         run: |
           pip install cmakelang
 
+      - name: Install rustfmt
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.0
+          components: rustfmt
+
       - uses: actions/checkout@v4
 
       - name: Check code format

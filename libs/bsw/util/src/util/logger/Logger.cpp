@@ -42,6 +42,11 @@ Level Logger::getLevel(uint8_t const componentIndex)
                                           : LEVEL_NONE;
 }
 
+extern "C" void
+bsw_cpp_logger_log(uint8_t const componentIndex, Level const level, char const* const str)
+{
+    Logger::log(componentIndex, level, str);
+}
 } /* namespace logger */
 } /* namespace util */
 

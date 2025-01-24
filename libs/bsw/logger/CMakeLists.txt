@@ -4,6 +4,9 @@ add_library(logger src/logger/DefaultLoggerCommand.cpp
 target_include_directories(logger PUBLIC include)
 
 target_link_libraries(logger PUBLIC util)
+
+target_include_directories(bsw_logger INTERFACE rust/include)
+
 if (BUILD_UNIT_TESTS)
     add_library(loggerMock INTERFACE)
 

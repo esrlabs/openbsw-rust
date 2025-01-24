@@ -43,6 +43,7 @@ target_link_libraries(
     PRIVATE asyncBinding
             asyncConsole
             bspMcu
+            bsw_logger
             configuration
             estd
             lifecycle
@@ -56,6 +57,7 @@ target_link_libraries(
             util
             udsConfigurationImpl
             runtime
+            rust_hello_world
             safeLifecycle
             socBsp)
 

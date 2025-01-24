@@ -21,6 +21,7 @@ set(CMAKE_ASM_SOURCE_FILE_EXTENSIONS "s;S")
 set(CMAKE_EXE_LINKER_FLAGS
     "-mcpu=cortex-m4 -static -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fmessage-length=0 --specs=nano.specs -specs=nosys.specs -Wl,--gc-sections -Wl,-Map,application.map,--cref "
 )
+set(Rust_CARGO_TARGET thumbv7em-none-eabihf)
 
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)
 set(CMAKE_CXX_COMPILER arm-none-eabi-g++)

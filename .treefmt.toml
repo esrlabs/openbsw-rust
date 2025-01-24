@@ -28,6 +28,7 @@ excludes = [
   "*.txt",
   "*.yaml",
   "*.yml",
+  "Cargo.lock",
   "LICENSE",
   "admin/cmake/CodeCoverage.cmake",
   "docker/**", 
@@ -43,3 +44,7 @@ includes = [ "*.c", "*.cc", "*.cpp", "*.h", ".hh", "*.hpp" ]
 command = "cmake-format"
 options = [ "-i" ]
 includes = [ "**/CMakeLists.txt", "*.cmake" ]
+
+[formatter.rust]
+command = "rustfmt"
+includes = ["*.rs"]

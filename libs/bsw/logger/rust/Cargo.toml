@@ -1,0 +1,12 @@
+[package]
+name = "bsw-logger"
+version.workspace = true
+documentation.workspace = true
+edition = "2024"
+
+[dependencies]
+log.workspace = true
+console_out = { path = "../../../rust/console_out" }
+
+[lib]
+crate-type=["staticlib"]

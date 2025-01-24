@@ -84,4 +84,11 @@ void flush()
             loggerComponentConfig));
 }
 
+::logger::PlainLoggerMappingInfo const* getLoggerComponentInfoTable()
+{
+    return loggerComponentInfoTable;
+}
+
+uintptr_t getLoggerComponentInfoTableSize() { return LoggerComponentMappingType::MappingSize; }
+
 } // namespace logger
