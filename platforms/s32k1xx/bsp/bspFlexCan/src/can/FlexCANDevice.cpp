@@ -3,6 +3,7 @@
 #include "can/FlexCANDevice.h"
 
 #include "can/canframes/CANFrame.h"
+#include "can/canframes/CanId.h"
 #include "can/transceiver/ICanTransceiver.h"
 #include "interrupts/SuspendResumeAllInterruptsScopedLock.h"
 

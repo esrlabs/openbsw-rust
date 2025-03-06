@@ -5,7 +5,7 @@
 //! # Usage
 //! To install this panic handler just declare it in you crate:
 //! ```
-//! extern crate panic_handler;
+//! extern crate openbsw_panic_handler;
 //! ```
 
 #[cfg(not(target_os = "none"))]

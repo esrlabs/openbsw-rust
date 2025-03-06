@@ -2,6 +2,7 @@
 
 #include "app/app.h"
 
+#include "async/Config.h"
 #include "console/console.h"
 #include "estd/typed_mem.h"
 #include "logger/logger.h"
@@ -12,6 +13,10 @@
 #include "systems/SysAdminSystem.h"
 
 #include <app/appConfig.h>
+#include <async/Async.h>
+#include <async/util/Call.h>
+
+#include <cstdint>
 
 #ifdef PLATFORM_SUPPORT_UDS
 #include "busid/BusId.h"
@@ -37,6 +42,7 @@ extern ::can::ICanSystem& getCanSystem();
 #endif
 
 #include "BswLogger.h"
+#include "ExecutorRunnable.h"
 #include "rustHelloWorld.h"
 
 #include <platform/estdint.h>
@@ -139,9 +145,6 @@ void run()
 {
     printf("hello\r\n");
     staticInit();
-    printf(
-        "calculated by rust: 33 + 9 = %lli\r\n",
-        (long long unsigned int)rustHelloWorld::add(33, 9));
     AsyncAdapter::init();
 
     /* runlevel 1 */
@@ -194,6 +197,11 @@ void run()
 
     lifecycleManager.transitionToLevel(MaxNumLevels);
 
+    // TODO: Hook into lifecycleManager
+    async::Function rustRunnable(
+        ::estd::function<void()>::create<&rustHelloWorld::init_demo_runtime>());
+    ::async::execute(TASK_DEMO, rustRunnable);
+
     runtimeMonitor.start();
     AsyncAdapter::run();
 
@@ -232,7 +240,7 @@ CanTask canTask{"can"};
 using BspTask = AsyncAdapter::Task<TASK_BSP, 1024 * 2>;
 BspTask bspTask{"bsp"};
 
-using DemoTask = AsyncAdapter::Task<TASK_DEMO, 1024 * 2>;
+using DemoTask = AsyncAdapter::Task<TASK_DEMO, 1024 * 50>;
 DemoTask demoTask{"demo"};
 
 using BackgroundTask = AsyncAdapter::Task<TASK_BACKGROUND, 1024 * 2>;

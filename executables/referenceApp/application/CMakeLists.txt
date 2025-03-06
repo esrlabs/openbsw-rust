@@ -43,7 +43,7 @@ target_link_libraries(
     PRIVATE asyncBinding
             asyncConsole
             bspMcu
-            bsw_logger
+            openbsw_logger
             configuration
             estd
             lifecycle

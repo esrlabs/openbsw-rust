@@ -1,8 +1,8 @@
 [package]
-name = "console_out"
+name = "openbsw-console-out"
 version.workspace = true
 documentation.workspace = true
 edition = "2024"
 
 [dependencies]
-panic_handler = { workspace = true }
+openbsw-panic-handler.workspace = true

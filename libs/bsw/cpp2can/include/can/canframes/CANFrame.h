@@ -7,8 +7,6 @@
  */
 #pragma once
 
-#include "can/canframes/CanId.h"
-
 #include <estd/assert.h>
 #include <platform/estdint.h>
 

@@ -45,6 +45,9 @@ jobs:
           components: clippy, rustfmt
           targets: thumbv7em-none-eabihf
 
+      - name: Install Libclang for bindgen
+        run: sudo apt update && sudo apt install libclang-dev -y
+
       - name: Set up ARM GCC
         if: ${{ matrix.platform == 's32k148' }}
         uses: carlosperate/arm-none-eabi-gcc-action@v1

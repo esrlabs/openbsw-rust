@@ -5,8 +5,21 @@ documentation.workspace = true
 edition = "2024"
 
 [dependencies]
-log = { workspace = true }
-panic_handler = { workspace = true }
+log.workspace = true
+openbsw-panic-handler.workspace = true
+openbsw-runtime.workspace = true
+openbsw-timer.workspace = true
+openbsw-can.workspace = true
+embassy-futures.workspace = true
+embassy-time = "0.4.0"
+embassy-executor.workspace = true
+embassy-sync = "0.6.2"
+
+[target.'cfg(not(target_os = "none"))'.dependencies]
+critical-section = { workspace = true, features = ["std"] }
+
+[target.'cfg(target_os = "none")'.dependencies]
+cortex-m = { version = "0.7.6", features = ["critical-section-single-core"]}
 
 [lib]
 crate-type=["staticlib"]

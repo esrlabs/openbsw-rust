@@ -13,7 +13,13 @@ namespace rustHelloWorld
 
 extern "C"
 {
-uint64_t add(uint64_t left, uint64_t right);
+/// Initializes the async rust runtime for the demo task
+void init_demo_runtime();
+
+/// This is the entry point which needs to be called to drive the runtime
+///
+/// ! The runtime must be initialized before calling this function the first time !
+void runtime_poll();
 
 } // extern "C"
 

@@ -8,6 +8,7 @@
 #pragma once
 
 #include "can/canframes/CANFrame.h"
+#include "can/canframes/CanId.h"
 #include "can/filter/IFilter.h"
 #include "can/filter/IMerger.h"
 

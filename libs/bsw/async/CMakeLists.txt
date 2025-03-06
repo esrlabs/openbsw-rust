@@ -1,6 +1,7 @@
 add_library(async INTERFACE)
 
 target_include_directories(async INTERFACE include)
+target_include_directories(async INTERFACE rust/include)
 
 target_link_libraries(async INTERFACE asyncPlatform)
 

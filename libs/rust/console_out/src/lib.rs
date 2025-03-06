@@ -1,6 +1,6 @@
 #![no_std]
 
-extern crate panic_handler;
+extern crate openbsw_panic_handler;
 
 /// Stdout console
 ///

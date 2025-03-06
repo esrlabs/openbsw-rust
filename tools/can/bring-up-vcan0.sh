@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Check if vcan0 interface exists
 if ip link show vcan0 > /dev/null 2>&1; then
