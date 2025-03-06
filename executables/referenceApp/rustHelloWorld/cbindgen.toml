@@ -3,4 +3,5 @@ header = "// Copyright 2024 Accenture."
 namespace = "rustHelloWorld"
 braces = "NextLine"
 
-[export.rename]
+[export]
+exclude = ["receive_new_can_frame"]

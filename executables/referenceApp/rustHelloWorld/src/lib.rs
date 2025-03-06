@@ -1,22 +1,82 @@
 #![no_std]
+#![allow(static_mut_refs)]
 
-extern crate panic_handler;
+#[cfg(target_os = "none")]
+extern crate cortex_m;
 
-use log::info;
+extern crate openbsw_panic_handler;
 
+use core::mem::MaybeUninit;
+use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, watch::Watch};
+use embassy_time::{Duration, Ticker, Timer};
+
+use log::{info, warn};
+use openbsw_can::{CanFrame, CanFrameTrait};
+use openbsw_runtime::BswExecutor;
+use openbsw_timer as _;
+
+static mut EXECUTOR: MaybeUninit<openbsw_runtime::BswExecutor> = MaybeUninit::uninit();
+
+/// Initializes the async rust runtime for the demo task
 #[unsafe(no_mangle)]
-pub extern "C" fn add(left: u64, right: u64) -> u64 {
-    info!("Adding {left} and {right}");
-    left + right
+pub extern "C" fn init_demo_runtime() {
+    // info!("Initializing Demo Runtime");
+    unsafe {
+        EXECUTOR.write(BswExecutor::new()).init(|spawner| {
+            spawner.must_spawn(loopy());
+            spawner.must_spawn(loopy2());
+            spawner.must_spawn(can_task());
+        });
+    };
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+/// This is the entry point which needs to be called to drive the runtime
+///
+/// ! The runtime must be initialized before calling this function the first time !
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn runtime_poll() {
+    let executor = unsafe { EXECUTOR.assume_init_mut() };
+    unsafe { executor.poll() };
+}
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+static CURRENT_CAN_FRAME: Watch<CriticalSectionRawMutex, CanFrame, 1> = Watch::new();
+
+#[unsafe(no_mangle)]
+pub extern "C" fn receive_new_can_frame(frame: *const CanFrame) {
+    let frame = unsafe { *frame };
+    CURRENT_CAN_FRAME.sender().send(frame.clone());
+}
+
+#[embassy_executor::task]
+async fn can_task() {
+    let mut can_receiver = CURRENT_CAN_FRAME
+        .receiver()
+        .expect("can_task not able to subscribe to can receiver");
+    loop {
+        let frame = can_receiver.changed().await;
+        info!("🦀 Received CAN Frame {:?}", frame.id())
+    }
+}
+
+#[embassy_executor::task]
+async fn loopy() {
+    let mut ticker = Ticker::every(Duration::from_secs(1));
+    let mut counter = 0;
+    for _ in 0..5 {
+        ticker.next().await;
+        info!("booting loopy");
+        counter += 1;
+    }
+    info!("Loopy boot completed in {counter} steps");
+    loop {
+        info!("Doing loopy work");
+        ticker.next().await;
+    }
+}
+#[embassy_executor::task]
+async fn loopy2() {
+    loop {
+        warn!("Doing different loopy work");
+        Timer::after_secs(2).await;
     }
 }

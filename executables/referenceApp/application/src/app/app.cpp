@@ -2,6 +2,7 @@
 
 #include "app/app.h"
 
+#include "async/Config.h"
 #include "console/console.h"
 #include "lifecycle/StaticBsp.h"
 #include "logger/logger.h"
@@ -17,6 +18,10 @@
 #include <app/appConfig.h>
 #include <etl/alignment.h>
 #include <etl/singleton.h>
+#include <async/Async.h>
+#include <async/util/Call.h>
+
+#include <cstdint>
 
 #ifdef PLATFORM_SUPPORT_UDS
 #include "busid/BusId.h"
@@ -61,6 +66,7 @@ extern ::ethernet::IEthernetDriverSystem& getEthernetSystem();
 #endif
 
 #include "BswLogger.h"
+#include "ExecutorRunnable.h"
 #include "rustHelloWorld.h"
 
 #include <platform/estdint.h>
@@ -202,9 +208,6 @@ void startApp()
     runtime::Tracer::init();
     runtime::Tracer::start();
 #endif
-    printf(
-        "calculated by rust: 33 + 9 = %lli\r\n",
-        (long long unsigned int)rustHelloWorld::add(33, 9));
     // AsyncAdapter::init();
 
     /* runlevel 1 */
@@ -269,6 +272,11 @@ void startApp()
 
     lifecycleManager.transitionToLevel(MaxNumLevels);
 
+    // TODO: Hook into lifecycleManager
+    async::Function rustRunnable(
+        ::estd::function<void()>::create<&rustHelloWorld::init_demo_runtime>());
+    ::async::execute(TASK_DEMO, rustRunnable);
+
     runtimeMonitor.start();
     idleHandler.start();
 }
@@ -294,7 +302,7 @@ EthernetTask ethernetTask{"ethernet"};
 using BspTask = AsyncAdapter::Task<TASK_BSP, 1024 * 2>;
 BspTask bspTask{"bsp"};
 
-using DemoTask = AsyncAdapter::Task<TASK_DEMO, 1024 * 2>;
+using DemoTask = AsyncAdapter::Task<TASK_DEMO, 1024 * 50>;
 DemoTask demoTask{"demo"};
 
 using BackgroundTask = AsyncAdapter::Task<TASK_BACKGROUND, 1024 * 2>;

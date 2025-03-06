@@ -5,7 +5,7 @@ target_include_directories(logger PUBLIC include)
 
 target_link_libraries(logger PUBLIC util)
 
-target_include_directories(bsw_logger INTERFACE rust/include)
+target_include_directories(openbsw_logger INTERFACE rust/include)
 
 if (BUILD_UNIT_TESTS)
     add_library(loggerMock INTERFACE)

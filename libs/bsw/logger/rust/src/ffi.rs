@@ -1,5 +1,5 @@
 #![allow(static_mut_refs)]
-use core::ffi::{c_char, CStr};
+use core::ffi::{CStr, c_char};
 
 unsafe extern "C" {
     pub(crate) fn bsw_cpp_logger_log(

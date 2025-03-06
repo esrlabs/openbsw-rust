@@ -16,8 +16,12 @@ CanDemoListener::CanDemoListener(::can::ICanTransceiver* canTransceiver)
 
 ::can::IFilter& CanDemoListener::getFilter() { return _canFilter; }
 
+extern "C" void receive_new_can_frame(::can::CANFrame const& frame);
+
 void CanDemoListener::frameReceived(::can::CANFrame const& frame)
 {
+    receive_new_can_frame(frame); // send to rust
+
     Logger::debug(
         CAN,
         "[CanDemoListener] received CAN frame, id=0x%X, length=%d",

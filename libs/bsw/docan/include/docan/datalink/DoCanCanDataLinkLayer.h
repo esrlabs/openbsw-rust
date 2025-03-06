@@ -5,6 +5,7 @@
 #include "docan/datalink/DoCanDataLinkLayer.h"
 
 #include <can/canframes/CANFrame.h>
+#include <can/canframes/CanId.h>
 
 namespace docan
 {

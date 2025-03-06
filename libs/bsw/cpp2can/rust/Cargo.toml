@@ -1,0 +1,12 @@
+[package]
+name = "openbsw-can"
+edition = "2024"
+version.workspace = true
+documentation.workspace = true
+
+[dependencies]
+embedded-can = "0.4"
+
+[build-dependencies]
+bindgen = "0.71.0"
+

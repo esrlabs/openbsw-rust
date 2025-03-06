@@ -49,7 +49,7 @@ target_link_libraries(
             lwipcore
             asyncConsole
             bspMcu
-            bsw_logger
+            openbsw_logger
             configuration
             ethConfiguration
             etl

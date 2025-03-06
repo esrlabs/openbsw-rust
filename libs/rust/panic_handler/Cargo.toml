@@ -1,5 +1,5 @@
 [package]
-name = "panic_handler"
+name = "openbsw-panic-handler"
 version.workspace = true
 documentation.workspace = true
 edition = "2024"

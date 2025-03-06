@@ -114,13 +114,13 @@ impl log::Log for BswLogger {
         } else {
             // No logger defined for target. Falling back to directly printing it to stdout
             write!(
-                console_out::Console,
+                openbsw_console_out::Console,
                 "{}: {}: {}",
                 record.target(),
                 record.level(),
                 record.args()
             )
-            .and_then(|()| write!(console_out::Console, "\r\n"))
+            .and_then(|()| write!(openbsw_console_out::Console, "\r\n"))
             .expect("printing to stdout should always be available");
         }
     }
