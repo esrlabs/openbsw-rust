@@ -158,6 +158,8 @@ void run()
     ::platform::platformLifecycleAdd(lifecycleManager, 1U);
     lifecycleManager.addComponent(
         "runtime", runtimeSystem.emplace(TASK_BACKGROUND, runtimeMonitor), 1U);
+    lifecycleManager.addComponent(
+        "safety", safetySystem.emplace(TASK_SAFETY, lifecycleManager), 1U);
     /* runlevel 2 */
     ::platform::platformLifecycleAdd(lifecycleManager, 2U);
     /* runlevel 3 */
@@ -198,9 +200,6 @@ void run()
 #endif
                 ),
         8U);
-
-    lifecycleManager.addComponent(
-        "safety", safetySystem.emplace(TASK_SAFETY, lifecycleManager), 8U);
 
     lifecycleManager.transitionToLevel(MaxNumLevels);
 
