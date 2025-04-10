@@ -1,84 +1,73 @@
-# Eclipse OpenBSW
+# Eclipse OpenBSW - Rust integration proof of concept
 
+This is a comprehensive update to integrate a Rust async runtime using the Embassy framework into OpenBSW. The changes include:
 
-## Build Status 🚀
+1. **Adding support for async execution of Rust code (`openbsw-runtime`, `openbsw-timer`).**
+2. **Adding plumbing libraries for console output (`openbsw-console-out`), panic handling (`openbsw-panic-handler`), and logging (`openbsw-logger`).**
+3. **Showcasing all the provided functionality in the `rustHelloWorld` crate.**
+4. **Exploring interoperability between C++ and Rust with bindgen, cbindgen, direct linking to extern functions, and integrating into CMake with Corrosion.**
 
-| Platform       | Status                                                                 |
-|----------------|------------------------------------------------------------------------|
-| POSIX Build | ![POSIX](https://github.com/eclipse-openbsw/openbsw/actions/workflows/build.yml/badge.svg?branch=main&event=push&matrix.platform=posix) |
-| S32K148     | ![S32K](https://github.com/eclipse-openbsw/openbsw/actions/workflows/build.yml/badge.svg?branch=main&event=push&matrix.platform=s32k148) |
+### Concept outline
 
-## Code Coverage 
+#### General level of integration
+Rust and C++ interaction is not trivial. However, there is no way around it if one wants to extend existing and proven C++ code bases with Rust.
 
-| Code Coverage            | Status                                                                 |
-|--------------------------|------------------------------------------------------------------------|
-| Line Coverage            | ![Line Coverage](https://raw.githubusercontent.com/esrlabs/openbsw/gh-pages/coverage_badges/line_coverage_badge.svg) |
-| Function Coverage        | ![Function Coverage](https://raw.githubusercontent.com/esrlabs/openbsw/gh-pages/coverage_badges/function_coverage_badge.svg) |
+Taking into account the constrained environment of microcontrollers in which OpenBSW operates, several different layers of separation come to mind.
 
+- **Dedicated core**: On multicore chips, one entire core could be dedicated to Rust. This core could talk to C++ code via mechanisms like shared memory.
+- **Dedicated OS task**: Using dedicated tasks for Rust systems is similar to having a dedicated core but allows tighter integration and thus lower hardware requirements.
+- **Deep integration**: Allow Rust code to run side by side with C++. This reduces overhead and allows for the most flexibility, but with potentially the most amount of interaction with the language barrier.
 
+We came to the conclusion that deep integration makes the most sense in this environment. Based on the following reasoning:
 
-## Overview
+1. We think Rust is going to have a bright future. It is ready for production, bringing increased safety and development comfort. The choice of integration should not limit the adoption of Rust to only some specific components.
+2. When interacting with C++ components, there is always the need to jump over the language barrier. No matter which integration path is chosen, all exposed C++ components need to provide their functionality in Rust.
+3. Creating artificial barriers will hinder adoption. Experience shows the need for flexibility in complicated projects.
+4. OpenBSW uses cooperative multitasking per priority level. This ensures highest efficiency. Using a different approach would lead to inefficiencies.
 
-Eclipse OpenBSW is an open source SDK to build professional, high quality embedded software products. 
-It is a software stack specifically designed and developed for automotive applications.
+#### Benefits of async Rust
+As previously explained, we want to strive for deep integration. In OpenBSW there already is a concept of Async, which allows the cooperative scheduling of Runnables.
+Direct interaction with sync Rust is cumbersome as persisting state would then require using static mutable memory.
+Using async Rust makes this much more ergonomic by compiling down to a State Machine that can be placed into static memory. The runtime then ensures safe access.
 
-This repository provides the complete code, documentation and a reference example
-that works out of the box without any specific hardware requirements (any POSIX platform)
-allowing developers to get up and running quickly.
+The only difference between Async in OpenBSW and async Rust is that Runnables cannot return control during execution. Instead, Rust will return control to the executor at each await point.
+This can however be easily modeled in OpenBSW Async by rescheduling the executor at each await point.
 
-## Target Audience
+#### Current limitations
+The quality and quantity of bindings to C++ need improvement. This will be a lot of work, but it can be done bit by bit.
 
-* **Open Source Enthusiasts**: Enthusiasts and hobbyists passionate about automotive technology
-  and interested in contributing to open source projects, collaborating with like-minded
-  individuals and exploring new ideas and projects in the automotive domain.
+Relying on an embassy runtime enables this proof of concept; however, as embassy is mostly designed to take full control of a system, the Runnable hosting the Embassy runtime would currently monopolize all the runtime under high load.
+This violates the approach of cooperative multitasking. In the medium term, the Rust executor needs to be modified to return control back to the OpenBSW Async runtime more often to ensure fair scheduling across Rust and C++.
 
-* **Embedded Systems Developers**: Developers specializing in embedded systems programming,
-  microcontroller firmware development and real-time operating systems (RTOS), who are interested
-  in automotive applications.
+### Key Changes Explained
 
-* **Automotive Engineers**: Professionals working in the automotive industry, including engineers,
-  designers and technicians, who are interested in developing and improving automotive
-  technologies, systems and components.
+#### 1. New Crates
 
-* **Students and Researchers**: Students, researchers, and academic institutions interested in
-  learning about automotive technologies, conducting research, and exploring innovative solutions
-  in automotive areas.
+- **[`openbsw-runtime`](libs/bsw/async/rust)**: This crate provides an async executor based on Embassy's raw executor. This executor is designed to be run in an OpenBSW Async Runnable ([ExecutorRunnable](libs/bsw/async/rust/include/ExecutorRunnable.h)).
 
-## Feature Overview
+- **[`openbsw-timer`](libs/bsw/timer/rust)**: Implements the Embassy time driver on top of OpenBSW Timers.
 
-### Implemented Features
+- **[`openbsw-can`](libs/bsw/cpp2can/rust)**: Handles CAN frame conversion between Rust and C++ types using the `embedded_can` crate.
 
-| Feature | Description | POSIX Support | S32K148 Support | New? |
-| --- | --- | --- | --- | --- |
-| Modular design | Based on each project's needs, required software modules can easily be included or excluded. | Yes | Yes | |
-| Application Lifecycle Management | The order in which Applications/Features are brought up/down is easily organised. | Yes | Yes | |
-| Console | A console is provided for diagnostic and development purposes. | In a terminal interface | Via UART | |
-| Commands | Commands can easily be added to the console to aid development, test and debugging. | Yes | Yes | |
-| Logging | Diagnostic logging is implemented per software component. | Yes | Yes | |
-| CAN | Support for CAN bus communication | If ``SocketCAN`` is supported | Yes | Since Release 0.1 |
-| Sensors and actuators integration | ADC, PWM & GPIO | | Yes | |
-| UDP, DoCAN | Diagnostics over CAN | If ``SocketCAN`` is supported | Yes | Since Release 0.1 |
+- **[`openbsw-logger`](libs/bsw/logger/rust)**: Implements logging by sending log messages to the C++ Logger or printing them to stdout as a fallback.
 
-## Roadmap
+- **[`openbsw-console-out`](libs/rust/console_out)**: Provides an interface for printing to the console, used by the logger.
 
-| Feature | Description | Planned for |
-| --- | --- | --- |
-| Ethernet | Add support for Ethernet communication to demo | Release 0.2 |
-| DoIP | Add support for Diagnostics over IP to demo | Release 0.2 |
+- **[`openbsw-panic-handler`](libs/rust/panic_handler)**: Defines custom panic handling behavior for Rust code.
 
-## Documentation
+#### 2. Integration into `rustHelloWorld`
 
-The [documentation](https://eclipse-openbsw.github.io/openbsw)
-describes Eclipse OpenBSW in detail and provides simple setup guides to build and use it.
+- **Initialization and Polling**:
+  - `init_demo_runtime`: Initializes the async runtime with tasks.
+  - `runtime_poll`: Drives the async runtime.
 
-## Contributing
+- **CAN Frame Handling**:
+  - `receive_new_can_frame`: Receives a CAN frame from C++ using Embassy's watch channel.
 
-It is expected that this respository will be used as a starting point for many custom developments.
-You may wish to contribute back some of your work to this repository.
-For more details see [CONTRIBUTING](CONTRIBUTING.md).
+- **Async Tasks**:
+  - `loopy`, `loopy2`, and `can_task` are defined as async tasks. They perform periodic work, different types of logging, and handle incoming CAN frames respectively.
 
-## Legals
+#### 3. Bindings
 
-Distributed under the [Apache 2.0 License](LICENSE).
-
-Also see [NOTICE](NOTICE.md).
+- **`bindgen`**: Used to generate Rust bindings for C++ header files (`CANFrame.h`). This allows the Rust code to directly interact with C++ data structures.
+- **`cbindgen`**: Used to generate C bindings from Rust crates.
