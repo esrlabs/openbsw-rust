@@ -1,12 +1,10 @@
 [package]
-name = "openbsw-can"
+name = "reference-app-async-core-configuration"
 edition = "2024"
 version.workspace = true
 documentation.workspace = true
 
 [dependencies]
-embedded-can = "0.4"
 
 [build-dependencies]
 bindgen.workspace = true
-

@@ -195,6 +195,13 @@ IdleHandler idleHandler;
 
 void startApp();
 
+void init_demo_runtime(){
+    rustHelloWorld::init_rust_runtime((uint8_t) TASK_DEMO);
+}
+void init_background_runtime(){
+    rustHelloWorld::init_rust_runtime((uint8_t)TASK_BACKGROUND);
+}
+
 void run()
 {
     printf("hello\r\n");
@@ -273,12 +280,21 @@ void startApp()
     lifecycleManager.transitionToLevel(MaxNumLevels);
 
     // TODO: Hook into lifecycleManager
-    async::Function rustRunnable(
-        ::estd::function<void()>::create<&rustHelloWorld::init_demo_runtime>());
-    ::async::execute(TASK_DEMO, rustRunnable);
+    async::Function rustDemoRunnable(
+        ::estd::function<void()>::create<&init_demo_runtime>());
+    async::Function rustBackgroundRunnable(
+        ::estd::function<void()>::create<&init_background_runtime>());
+    ::async::execute(TASK_BACKGROUND, rustBackgroundRunnable);
+    ::async::execute(TASK_DEMO, rustDemoRunnable);
 
     runtimeMonitor.start();
     idleHandler.start();
+}
+
+// TODO find a better place for this
+extern "C" ::async::ContextType getCurrentTaskContext(){
+    auto const context = ::async::AsyncBinding::AdapterType::getCurrentTaskContext();
+    return context;
 }
 
 using IdleTask = AsyncAdapter::IdleTask<1024 * 2>;
@@ -305,7 +321,7 @@ BspTask bspTask{"bsp"};
 using DemoTask = AsyncAdapter::Task<TASK_DEMO, 1024 * 50>;
 DemoTask demoTask{"demo"};
 
-using BackgroundTask = AsyncAdapter::Task<TASK_BACKGROUND, 1024 * 2>;
+using BackgroundTask = AsyncAdapter::Task<TASK_BACKGROUND, 1024 * 50>;
 BackgroundTask backgroundTask{"background"};
 
 using SafetyTask = AsyncAdapter::Task<TASK_SAFETY, 1024 * 2>;
