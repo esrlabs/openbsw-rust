@@ -8,43 +8,60 @@
 
 #include <cstdint>
 #include <cstdio>
-extern "C" void runtime_poll();
-extern "C" void check_alarm();
+extern "C" void runtime_poll(uint8_t context);
+extern "C" void check_alarm(uint8_t context);
 
 class ExecutorRunnable final : private ::async::IRunnable
 {
-    void execute()
-    {
-        check_alarm();
-        runtime_poll();
-    }
 public:
     ExecutorRunnable(ExecutorRunnable const&) = delete;
     ExecutorRunnable& operator=(ExecutorRunnable const&) = delete;
+    ExecutorRunnable() = delete;
+    ExecutorRunnable(::async::ContextType context) : _context(context), _timeout(){}
 
-    ExecutorRunnable() = default;
-
-    void schedulePoll() { ::async::execute(TASK_DEMO, *this); }
+    void schedulePoll() { ::async::execute(_context, *this); }
 
     void schedulePollIn(uint32_t delay_us)
     {
-        static ::async::TimeoutType timeout;
-        if (getSystemTimeUs32Bit() + delay_us < timeout._time)
+        if (getSystemTimeUs32Bit() + delay_us < _timeout._time)
         {
-            timeout.cancel();
+            _timeout.cancel();
         }
-        ::async::schedule(TASK_DEMO, *this, timeout, delay_us, ::async::TimeUnit::MICROSECONDS);
+        ::async::schedule(_context, *this, _timeout, delay_us, ::async::TimeUnit::MICROSECONDS);
+    }
+
+private:
+    ::async::ContextType _context;
+    ::async::TimeoutType _timeout;
+    void execute()
+    {
+        check_alarm(_context);
+        runtime_poll(_context);
     }
 };
 
-static ExecutorRunnable EXECUTOR;
+static ExecutorRunnable DEMO_EXECUTOR(TASK_DEMO);
+static ExecutorRunnable BACKGROUND_EXECUTOR(TASK_BACKGROUND);
 
 extern "C" void schedule_rust_runtime(uint8_t context)
 {
-    if (context == TASK_DEMO)
-    {
-        EXECUTOR.schedulePoll();
+    switch (context) {
+    case TASK_DEMO:
+        DEMO_EXECUTOR.schedulePoll();
+        break;
+    case TASK_BACKGROUND:
+        BACKGROUND_EXECUTOR.schedulePoll();
+        break;
     }
 }
 
-extern "C" void schedule_rust_runtime_in(uint32_t delay_us) { EXECUTOR.schedulePollIn(delay_us); }
+extern "C" void schedule_rust_runtime_in(uint8_t context, uint32_t delay_us) {
+    switch (context) {
+    case TASK_DEMO:
+        DEMO_EXECUTOR.schedulePollIn(delay_us);
+        break;
+    case TASK_BACKGROUND:
+        BACKGROUND_EXECUTOR.schedulePollIn(delay_us);
+        break;
+    }
+ }

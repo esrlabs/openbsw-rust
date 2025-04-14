@@ -11,18 +11,21 @@ version = "0.1.0"
 documentation = "https://eclipse-openbsw.github.io/openbsw/"
 
 [workspace.dependencies]
+reference-app-async-core-configuration.path = "executables/referenceApp/asyncCoreConfiguration/rust"
+
 openbsw-can.path = "libs/bsw/cpp2can/rust"
 openbsw-console-out.path = "libs/rust/console_out"
 openbsw-logger.path = "libs/bsw/logger/rust"
 openbsw-panic-handler.path = "libs/rust/panic_handler"
 openbsw-runtime.path = "libs/bsw/async/rust"
 openbsw-timer.path = "libs/bsw/timer/rust"
+
 embassy-executor = "0.7.0"
 embassy-futures = "0.1.1"
 
 log = "0.4"
-
 critical-section = "1.2.0"
+bindgen = "0.71.0"
 
 [profile.dev]
 panic ="abort"

@@ -506,6 +506,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "reference-app-async-core-configuration"
+version = "0.1.0"
+dependencies = [
+ "bindgen",
+]
+
+[[package]]
 name = "regex"
 version = "1.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -549,6 +556,7 @@ dependencies = [
  "openbsw-panic-handler",
  "openbsw-runtime",
  "openbsw-timer",
+ "reference-app-async-core-configuration",
 ]
 
 [[package]]

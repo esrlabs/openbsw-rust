@@ -18,10 +18,9 @@ fn __pender(context: *mut ()) {
 }
 
 impl BswExecutor {
-    pub fn new() -> Self {
-        const TASK_DEMO: u8 = 4;
+    pub fn new(task_id: u8) -> Self {
         Self {
-            inner: embassy_executor::raw::Executor::new(TASK_DEMO as *mut ()),
+            inner: embassy_executor::raw::Executor::new(task_id as *mut ()),
             not_send: PhantomData,
         }
     }

@@ -8,35 +8,61 @@ extern crate openbsw_panic_handler;
 
 use core::mem::MaybeUninit;
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, watch::Watch};
-use embassy_time::{Duration, Ticker, Timer};
+use embassy_time::{Duration, Ticker, Timer, block_for};
 
-use log::{info, warn};
+use log::{error, info, warn};
 use openbsw_can::{CanFrame, CanFrameTrait};
 use openbsw_runtime::BswExecutor;
 use openbsw_timer as _;
+use reference_app_async_core_configuration::{TASK_BACKGROUND, TASK_DEMO};
 
-static mut EXECUTOR: MaybeUninit<openbsw_runtime::BswExecutor> = MaybeUninit::uninit();
+static mut DEMO_EXECUTOR: MaybeUninit<openbsw_runtime::BswExecutor> = MaybeUninit::uninit();
+static mut BACKGROUND_EXECUTOR: MaybeUninit<openbsw_runtime::BswExecutor> = MaybeUninit::uninit();
 
 /// Initializes the async rust runtime for the demo task
 #[unsafe(no_mangle)]
-pub extern "C" fn init_demo_runtime() {
-    // info!("Initializing Demo Runtime");
-    unsafe {
-        EXECUTOR.write(BswExecutor::new()).init(|spawner| {
-            spawner.must_spawn(loopy());
-            spawner.must_spawn(loopy2());
-            spawner.must_spawn(can_task());
-        });
-    };
+pub extern "C" fn init_rust_runtime(context: u8) {
+    match context as u32 {
+        TASK_DEMO => {
+            unsafe {
+                DEMO_EXECUTOR
+                    .write(BswExecutor::new(TASK_DEMO as u8))
+                    .init(|spawner| {
+                        spawner.must_spawn(loopy());
+                        spawner.must_spawn(loopy2());
+                        spawner.must_spawn(can_task());
+                    });
+            };
+        }
+        TASK_BACKGROUND => {
+            unsafe {
+                BACKGROUND_EXECUTOR
+                    .write(BswExecutor::new(TASK_BACKGROUND as u8))
+                    .init(|spawner| {
+                        spawner.must_spawn(background());
+                    });
+            };
+        }
+        _ => unreachable!(),
+    }
 }
 
 /// This is the entry point which needs to be called to drive the runtime
 ///
 /// ! The runtime must be initialized before calling this function the first time !
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn runtime_poll() {
-    let executor = unsafe { EXECUTOR.assume_init_mut() };
-    unsafe { executor.poll() };
+pub unsafe extern "C" fn runtime_poll(context: u8) {
+    match context as u32 {
+        TASK_DEMO => {
+            let executor = unsafe { DEMO_EXECUTOR.assume_init_mut() };
+            unsafe { executor.poll() };
+        }
+        TASK_BACKGROUND => {
+            let executor = unsafe { BACKGROUND_EXECUTOR.assume_init_mut() };
+            unsafe { executor.poll() };
+        }
+        _ => unreachable!(),
+    }
 }
 
 static CURRENT_CAN_FRAME: Watch<CriticalSectionRawMutex, CanFrame, 1> = Watch::new();
@@ -78,5 +104,15 @@ async fn loopy2() {
     loop {
         warn!("Doing different loopy work");
         Timer::after_secs(2).await;
+    }
+}
+
+#[embassy_executor::task]
+async fn background() {
+    loop {
+        error!("Starting unimportant long running background job");
+        block_for(Duration::from_secs(3));
+        error!("DONE");
+        Timer::after_secs(5).await;
     }
 }

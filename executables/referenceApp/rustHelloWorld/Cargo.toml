@@ -5,6 +5,7 @@ documentation.workspace = true
 edition = "2024"
 
 [dependencies]
+reference-app-async-core-configuration.workspace = true
 log.workspace = true
 openbsw-panic-handler.workspace = true
 openbsw-runtime.workspace = true
