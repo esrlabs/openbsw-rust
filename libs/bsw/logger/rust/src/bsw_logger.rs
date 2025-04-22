@@ -12,7 +12,7 @@ unsafe impl Sync for BswLogger {}
 
 impl BswLogger {
     /// Create a new [BswLogger] without any forwarding configured
-    pub const fn new() -> Self {
+    pub const fn create() -> Self {
         Self {
             components: &[],
             crate_to_component_index: [None; 128],

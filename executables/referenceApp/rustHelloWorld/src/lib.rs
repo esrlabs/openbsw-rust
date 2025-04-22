@@ -14,7 +14,7 @@ use log::{error, info, warn};
 use openbsw_can::{CanFrame, CanFrameTrait};
 use openbsw_runtime::BswExecutor;
 use openbsw_timer as _;
-use reference_app_async_core_configuration::{TASK_BACKGROUND, TASK_DEMO};
+use reference_app_async_core_configuration::{TASK, TASK_TASK_BACKGROUND, TASK_TASK_DEMO};
 
 static mut DEMO_EXECUTOR: MaybeUninit<openbsw_runtime::BswExecutor> = MaybeUninit::uninit();
 static mut BACKGROUND_EXECUTOR: MaybeUninit<openbsw_runtime::BswExecutor> = MaybeUninit::uninit();
@@ -22,11 +22,11 @@ static mut BACKGROUND_EXECUTOR: MaybeUninit<openbsw_runtime::BswExecutor> = Mayb
 /// Initializes the async rust runtime for the demo task
 #[unsafe(no_mangle)]
 pub extern "C" fn init_rust_runtime(context: u8) {
-    match context as u32 {
-        TASK_DEMO => {
+    match context as TASK {
+        reference_app_async_core_configuration::TASK_TASK_DEMO => {
             unsafe {
                 DEMO_EXECUTOR
-                    .write(BswExecutor::new(TASK_DEMO as u8))
+                    .write(BswExecutor::new(TASK_TASK_DEMO as u8))
                     .init(|spawner| {
                         spawner.must_spawn(loopy());
                         spawner.must_spawn(loopy2());
@@ -34,10 +34,10 @@ pub extern "C" fn init_rust_runtime(context: u8) {
                     });
             };
         }
-        TASK_BACKGROUND => {
+        reference_app_async_core_configuration::TASK_TASK_BACKGROUND => {
             unsafe {
                 BACKGROUND_EXECUTOR
-                    .write(BswExecutor::new(TASK_BACKGROUND as u8))
+                    .write(BswExecutor::new(TASK_TASK_BACKGROUND as u8))
                     .init(|spawner| {
                         spawner.must_spawn(background());
                     });
@@ -49,15 +49,19 @@ pub extern "C" fn init_rust_runtime(context: u8) {
 
 /// This is the entry point which needs to be called to drive the runtime
 ///
-/// ! The runtime must be initialized before calling this function the first time !
+/// # Safety
+///
+/// The runtime must be initialized before calling this function the first time.
+///
+/// The given context must correspond to a valid freertos task with a rust tuntime.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn runtime_poll(context: u8) {
-    match context as u32 {
-        TASK_DEMO => {
+    match context as TASK {
+        reference_app_async_core_configuration::TASK_TASK_DEMO => {
             let executor = unsafe { DEMO_EXECUTOR.assume_init_mut() };
             unsafe { executor.poll() };
         }
-        TASK_BACKGROUND => {
+        reference_app_async_core_configuration::TASK_TASK_BACKGROUND => {
             let executor = unsafe { BACKGROUND_EXECUTOR.assume_init_mut() };
             unsafe { executor.poll() };
         }
@@ -68,9 +72,15 @@ pub unsafe extern "C" fn runtime_poll(context: u8) {
 static CURRENT_CAN_FRAME: Watch<CriticalSectionRawMutex, CanFrame, 1> = Watch::new();
 
 #[unsafe(no_mangle)]
-pub extern "C" fn receive_new_can_frame(frame: *const CanFrame) {
+/// To be called from C++ once a new CAN Frame arrived.
+///
+/// # Safety
+///
+/// Must be given a valid non-null pointer to a CanFrame.
+pub unsafe extern "C" fn receive_new_can_frame(frame: *const CanFrame) {
+    // Safety: frame must be valid and is copied because CanFrame implements Copy
     let frame = unsafe { *frame };
-    CURRENT_CAN_FRAME.sender().send(frame.clone());
+    CURRENT_CAN_FRAME.sender().send(frame);
 }
 
 #[embassy_executor::task]

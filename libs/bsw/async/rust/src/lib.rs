@@ -25,6 +25,25 @@ impl BswExecutor {
         }
     }
 
+    /// Poll all queued tasks in this executor.
+    ///
+    /// This loops over all tasks that are queued to be polled (i.e. they're
+    /// freshly spawned or they've been woken). Other tasks are not polled.
+    ///
+    /// You must call `poll` after receiving a call to the pender. It is OK
+    /// to call `poll` even when not requested by the pender, but it wastes
+    /// energy.
+    ///
+    /// # Safety
+    ///
+    /// You must call [Self::new()] before calling this method.
+    ///
+    /// You must NOT call `poll` reentrantly on the same executor.
+    ///
+    /// In particular, note that `poll` may call the pender synchronously. Therefore, you
+    /// must NOT directly call `poll()` from the pender callback. Instead, the callback has to
+    /// somehow schedule for `poll()` to be called later, at a time you know for sure there's
+    /// no `poll()` already running.
     pub unsafe fn poll(&'static self) {
         unsafe { self.inner.poll() };
     }
