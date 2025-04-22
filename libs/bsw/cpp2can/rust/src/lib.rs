@@ -15,6 +15,7 @@ pub(crate) mod bindings {
 
 const EXTENDED_QUALIFIER_BIT_VALUE: u32 = 0x80000000;
 
+#[repr(transparent)]
 #[derive(Debug, Copy, Clone)]
 pub struct CanFrame {
     inner: bindings::can_CANFrame,
@@ -34,7 +35,7 @@ impl embedded_can::Frame for CanFrame {
             return None;
         }
         let mut payload = [0u8; MAX_PAYLOAD_LEN];
-        for (i, b) in data.into_iter().enumerate() {
+        for (i, b) in data.iter().enumerate() {
             payload[i] = *b;
         }
         Some(Self {

@@ -10,7 +10,7 @@ unsafe extern "C" {
 }
 
 #[unsafe(no_mangle)]
-static mut LOGGER: crate::BswLogger = crate::BswLogger::new();
+static mut LOGGER: crate::BswLogger = crate::BswLogger::create();
 
 /// provide information about the loggers to rust
 #[unsafe(no_mangle)]

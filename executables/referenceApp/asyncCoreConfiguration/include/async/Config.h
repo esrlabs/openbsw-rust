@@ -17,7 +17,7 @@
 /**
  * Tasks for different operations are defined here.
  */
-enum
+enum TASK
 {
     TASK_BACKGROUND = 1,
     TASK_BSP,
