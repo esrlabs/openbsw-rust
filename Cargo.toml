@@ -22,6 +22,7 @@ openbsw-timer.path = "libs/bsw/timer/rust"
 
 embassy-executor = "0.7.0"
 embassy-futures = "0.1.1"
+embassy-sync = "0.6.2"
 
 log = "0.4"
 critical-section = "1.2.0"
