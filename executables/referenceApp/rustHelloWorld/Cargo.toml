@@ -5,16 +5,16 @@ documentation.workspace = true
 edition = "2024"
 
 [dependencies]
-reference-app-async-core-configuration.workspace = true
+embassy-executor.workspace = true
+embassy-futures.workspace = true
+embassy-sync.workspace = true
+embassy-time = "0.4.0"
 log.workspace = true
+openbsw-can.workspace = true
 openbsw-panic-handler.workspace = true
 openbsw-runtime.workspace = true
-openbsw-timer.workspace = true
-openbsw-can.workspace = true
-embassy-futures.workspace = true
-embassy-time = "0.4.0"
-embassy-executor.workspace = true
-embassy-sync = "0.6.2"
+openbsw-timer = { workspace = true, features = ["max_8_tasks"]}
+reference-app-async-core-configuration.workspace = true
 
 [target.'cfg(not(target_os = "none"))'.dependencies]
 critical-section = { workspace = true, features = ["std"] }

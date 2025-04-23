@@ -8,3 +8,26 @@ documentation.workspace = true
 critical-section.workspace = true
 embassy-time-driver = { version = "0.2.0", features = ["tick-hz-1_000_000"] }
 embassy-time-queue-utils = "0.1.0"
+embassy-sync.workspace = true
+
+[features]
+max_1_tasks = []
+max_2_tasks = []
+max_3_tasks = []
+max_4_tasks = []
+max_5_tasks = []
+max_6_tasks = []
+max_7_tasks = []
+max_8_tasks = []
+max_9_tasks = []
+max_10_tasks = []
+max_11_tasks = []
+max_12_tasks = []
+max_13_tasks = []
+max_14_tasks = []
+max_15_tasks = []
+max_16_tasks = []
+max_17_tasks = []
+max_18_tasks = []
+max_19_tasks = []
+max_20_tasks = []

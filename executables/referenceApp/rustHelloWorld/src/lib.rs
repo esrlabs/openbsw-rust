@@ -5,6 +5,7 @@
 extern crate cortex_m;
 
 extern crate openbsw_panic_handler;
+extern crate openbsw_timer;
 
 use core::mem::MaybeUninit;
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, watch::Watch};
@@ -13,7 +14,6 @@ use embassy_time::{Duration, Ticker, Timer, block_for};
 use log::{error, info, warn};
 use openbsw_can::{CanFrame, CanFrameTrait};
 use openbsw_runtime::BswExecutor;
-use openbsw_timer as _;
 use reference_app_async_core_configuration::{TASK, TASK_TASK_BACKGROUND, TASK_TASK_DEMO};
 
 static mut DEMO_EXECUTOR: MaybeUninit<openbsw_runtime::BswExecutor> = MaybeUninit::uninit();
