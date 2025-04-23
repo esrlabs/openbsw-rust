@@ -1,6 +1,16 @@
 #![no_std]
 use core::marker::PhantomData;
 
+/// The [Embassy](embassy_executor::raw::Executor) based executor for OpenBSW.
+///
+/// This executor is designed to be run in an Async Runnable. This allows the concurrent execution
+/// of C++ and Rust in the same RTOS thread. Thus creating no additional boundaries for the gradual
+/// adoption of Rust into all areas of OpenBSW.
+/// Another benefit of this approach is the platform independence of OpenBSW is maintained.
+///
+/// # Caveats
+/// Embassy is designed to execute all queued tasks. This means the Runnable hosting the [BswExecutor]
+/// might introduce higher jitter in other Runnables running on the same RTOS thread.
 pub struct BswExecutor {
     inner: embassy_executor::raw::Executor,
     not_send: PhantomData<*mut ()>,
@@ -18,6 +28,7 @@ fn __pender(context: *mut ()) {
 }
 
 impl BswExecutor {
+    /// Create a new [BswExecutor] for a given RTOS thread/task id.
     pub fn new(task_id: u8) -> Self {
         Self {
             inner: embassy_executor::raw::Executor::new(task_id as *mut ()),
@@ -29,6 +40,7 @@ impl BswExecutor {
     ///
     /// This loops over all tasks that are queued to be polled (i.e. they're
     /// freshly spawned or they've been woken). Other tasks are not polled.
+    /// Each task is only polled once.
     ///
     /// You must call `poll` after receiving a call to the pender. It is OK
     /// to call `poll` even when not requested by the pender, but it wastes
@@ -50,11 +62,11 @@ impl BswExecutor {
 
     /// Run the executor.
     ///
-    /// The `init` closure is called with a [`Spawner`] that spawns tasks on
+    /// The `init` closure is called with a [`embassy_executor::Spawner`] that spawns tasks on
     /// this executor. Use it to spawn the initial task(s). After `init` returns,
     /// the executor starts running the tasks.
     ///
-    /// To spawn more tasks later, you may keep copies of the [`Spawner`] (it is `Copy`),
+    /// To spawn more tasks later, you may keep copies of the [`embassy_executor::Spawner`] (it is `Copy`),
     /// for example by passing it as an argument to the initial tasks.
     ///
     /// This function requires `&'static mut self`. This means you have to store the
