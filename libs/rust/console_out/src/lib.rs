@@ -4,7 +4,7 @@ extern crate openbsw_panic_handler;
 
 /// Stdout console
 ///
-/// implements core::fmt::Write
+/// implements [`core::fmt::write`]
 pub struct Console;
 
 impl core::fmt::Write for Console {
