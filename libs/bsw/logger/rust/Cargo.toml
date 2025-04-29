@@ -8,5 +8,3 @@ edition = "2024"
 log.workspace = true
 openbsw-console-out.workspace = true
 
-[lib]
-crate-type=["staticlib"]

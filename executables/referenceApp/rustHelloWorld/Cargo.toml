@@ -11,6 +11,7 @@ embassy-sync.workspace = true
 embassy-time = "0.4.0"
 log.workspace = true
 openbsw-can.workspace = true
+openbsw-logger.workspace = true
 openbsw-panic-handler.workspace = true
 openbsw-runtime.workspace = true
 openbsw-timer = { workspace = true, features = ["max_8_tasks"]}

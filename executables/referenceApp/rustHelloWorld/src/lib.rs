@@ -4,6 +4,7 @@
 #[cfg(target_os = "none")]
 extern crate cortex_m;
 
+extern crate openbsw_logger;
 extern crate openbsw_panic_handler;
 extern crate openbsw_timer;
 
@@ -121,7 +122,7 @@ async fn loopy2() {
 async fn background() {
     loop {
         error!("Starting unimportant long running background job");
-        block_for(Duration::from_secs(3));
+        block_for(Duration::from_millis(500));
         error!("DONE");
         Timer::after_secs(5).await;
     }
