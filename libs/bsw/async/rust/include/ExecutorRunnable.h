@@ -41,17 +41,17 @@ private:
     }
 };
 
-static ExecutorRunnable DEMO_EXECUTOR(TASK_DEMO);
-static ExecutorRunnable BACKGROUND_EXECUTOR(TASK_BACKGROUND);
+static ExecutorRunnable DEMO_EXECUTOR_RUNNABLE(TASK_DEMO);
+static ExecutorRunnable BACKGROUND_EXECUTOR_RUNNABLE(TASK_BACKGROUND);
 
 extern "C" void schedule_rust_runtime(uint8_t context)
 {
     switch (context) {
     case TASK_DEMO:
-        DEMO_EXECUTOR.schedulePoll();
+        DEMO_EXECUTOR_RUNNABLE.schedulePoll();
         break;
     case TASK_BACKGROUND:
-        BACKGROUND_EXECUTOR.schedulePoll();
+        BACKGROUND_EXECUTOR_RUNNABLE.schedulePoll();
         break;
     }
 }
@@ -59,10 +59,10 @@ extern "C" void schedule_rust_runtime(uint8_t context)
 extern "C" void schedule_rust_runtime_in(uint8_t context, uint32_t delay_us) {
     switch (context) {
     case TASK_DEMO:
-        DEMO_EXECUTOR.schedulePollIn(delay_us);
+        DEMO_EXECUTOR_RUNNABLE.schedulePollIn(delay_us);
         break;
     case TASK_BACKGROUND:
-        BACKGROUND_EXECUTOR.schedulePollIn(delay_us);
+        BACKGROUND_EXECUTOR_RUNNABLE.schedulePollIn(delay_us);
         break;
     }
  }

@@ -3,6 +3,7 @@
 #include "app/app.h"
 
 #include "async/Config.h"
+#include "async/IRunnable.h"
 #include "console/console.h"
 #include "estd/typed_mem.h"
 #include "logger/logger.h"
@@ -141,12 +142,17 @@ void staticShutdown()
     softwareSystemReset();
 }
 
-void init_demo_runtime(){
-    rustHelloWorld::init_rust_runtime((uint8_t) TASK_DEMO);
-}
-void init_background_runtime(){
-    rustHelloWorld::init_rust_runtime((uint8_t)TASK_BACKGROUND);
-}
+struct InitDemoRunntimeRunnable : public async::IRunnable{
+    void execute(){
+        rustHelloWorld::init_rust_runtime((uint8_t) TASK_DEMO);
+    }
+};
+
+struct InitBackgroundRuntimeRunnable: public async::IRunnable{
+    void execute(){
+        rustHelloWorld::init_rust_runtime((uint8_t)TASK_BACKGROUND);
+    }
+};
 
 void run()
 {
@@ -204,12 +210,10 @@ void run()
     lifecycleManager.transitionToLevel(MaxNumLevels);
 
     // TODO: Hook into lifecycleManager
-    async::Function rustDemoRunnable(
-        ::estd::function<void()>::create<&init_demo_runtime>());
-    async::Function rustBackgroundRunnable(
-        ::estd::function<void()>::create<&init_background_runtime>());
-    ::async::execute(TASK_BACKGROUND, rustBackgroundRunnable);
-    ::async::execute(TASK_DEMO, rustDemoRunnable);
+    static InitBackgroundRuntimeRunnable rtBg;
+    static InitDemoRunntimeRunnable rtDemo;
+    ::async::execute(TASK_BACKGROUND, rtBg);
+    ::async::execute(TASK_DEMO, rtDemo);
 
     runtimeMonitor.start();
     AsyncAdapter::run();
@@ -255,10 +259,10 @@ CanTask canTask{"can"};
 using BspTask = AsyncAdapter::Task<TASK_BSP, 1024 * 2>;
 BspTask bspTask{"bsp"};
 
-using DemoTask = AsyncAdapter::Task<TASK_DEMO, 1024 * 50>;
+using DemoTask = AsyncAdapter::Task<TASK_DEMO, 1024 * 5>;
 DemoTask demoTask{"demo"};
 
-using BackgroundTask = AsyncAdapter::Task<TASK_BACKGROUND, 1024 * 50>;
+using BackgroundTask = AsyncAdapter::Task<TASK_BACKGROUND, 1024 * 10>;
 BackgroundTask backgroundTask{"background"};
 
 using SafetyTask = AsyncAdapter::Task<TASK_SAFETY, 1024 * 2>;

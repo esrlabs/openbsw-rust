@@ -20,7 +20,11 @@ void init_rust_runtime(uint8_t context);
 
 /// This is the entry point which needs to be called to drive the runtime
 ///
-/// ! The runtime must be initialized before calling this function the first time !
+/// # Safety
+///
+/// The runtime must be initialized before calling this function the first time.
+///
+/// The given context must correspond to a valid freertos task with a rust tuntime.
 void runtime_poll(uint8_t context);
 
 }  // extern "C"
