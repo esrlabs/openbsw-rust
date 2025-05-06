@@ -121,9 +121,9 @@ async fn loopy2() {
 #[embassy_executor::task]
 async fn background() {
     loop {
+        Timer::after_secs(5).await;
         error!("Starting unimportant long running background job");
         block_for(Duration::from_millis(500));
         error!("DONE");
-        Timer::after_secs(5).await;
     }
 }
