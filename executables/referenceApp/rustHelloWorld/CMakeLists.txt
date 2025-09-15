@@ -1,1 +1,2 @@
 target_include_directories(rust_hello_world INTERFACE include)
+target_link_libraries(rust_hello_world INTERFACE util)
